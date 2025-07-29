@@ -35,6 +35,8 @@ class SendMailJob implements JobInterface
     public function execute(Message $message): ?string
     {
         $result = false;
+        $emailMessage = null;
+        
         try {
             $transportClassName = $message->getArgument('transport');
             $config = $message->getArgument('config', []);
@@ -48,8 +50,16 @@ class SendMailJob implements JobInterface
             }
             $emailMessage->createFromArray($data);
             $result = $transport->send($emailMessage);
+            
+            $emailMessage->getMessageId();
         } catch (Exception $e) {
-            Log::error(sprintf('An error has occurred processing message: %s', $e->getMessage()));
+            $message = sprintf(
+                'An error has occurred processing message [id: %s] [subject: %s] %s', 
+                $emailMessage?->getMessageId(),
+                $emailMessage?->getSubject(),
+                $e->getMessage(),
+            );
+            Log::error($message);
         }
 
         if (!$result) {
