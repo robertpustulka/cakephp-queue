@@ -53,7 +53,7 @@ class SendMailJob implements JobInterface
         }
 
         if (!$result) {
-            return Processor::REJECT;
+            return Processor::REQUEUE;
         }
 
         return Processor::ACK;
